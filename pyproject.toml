@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "googleadsagent-mcp"
+version = "0.2.0"
+description = "Google Ads MCP Server — googleadsagent.ai"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{name = "It All Started With AI Idea", email = "john@itallstartedwithaidea.com"}]
+keywords = ["google-ads", "mcp", "ai", "claude", "ppc", "advertising"]
+dependencies = [
+    "fastmcp>=2.0.0",
+    "google-ads>=28.1.0",
+    "google-auth>=2.25.2",
+    "google-auth-oauthlib>=1.1.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+    "proto-plus>=1.23.0",
+    "anthropic>=0.43.0",   # standalone CLI + orchestrator
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+gads-mcp       = "ads_mcp.server:run"         # MCP server (stdio or --http)
+gads-agent     = "scripts.cli:main"            # standalone agent CLI
+gads-validate  = "scripts.validate:main"       # health check
+
+[project.urls]
+Homepage      = "https://googleadsagent.ai"
+Repository    = "https://github.com/itallstartedwithaidea/google-ads-mcp"
+Documentation = "https://github.com/itallstartedwithaidea/google-ads-mcp#readme"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ads_mcp", "scripts"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

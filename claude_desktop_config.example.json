@@ -1,0 +1,16 @@
+{
+  "_comment": "Claude Desktop MCP configuration for google-ads-mcp.",
+  "_docs": "https://docs.anthropic.com/en/docs/claude-desktop/mcp",
+
+  "mcpServers": {
+    "google-ads": {
+      "command": "python",
+      "args": ["-m", "ads_mcp.server"],
+      "cwd": "/path/to/google-ads-mcp",
+      "env": {
+        "GOOGLE_ADS_CREDENTIALS": "/path/to/google-ads.yaml",
+        "GOOGLE_ADS_LOGIN_CUSTOMER_ID": "123-456-7890"
+      }
+    }
+  }
+}
