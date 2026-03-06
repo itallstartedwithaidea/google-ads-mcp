@@ -9,7 +9,6 @@ model on-demand access to field metadata.
 
 from ads_mcp.coordinator import mcp
 
-
 GAQL_REFERENCE = """
 # Google Ads Query Language (GAQL) Reference
 

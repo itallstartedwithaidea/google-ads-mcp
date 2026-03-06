@@ -15,7 +15,7 @@ Sources:
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from fastmcp.exceptions import ToolError
 
@@ -28,10 +28,11 @@ logger = logging.getLogger(__name__)
 
 # ─── Internal search helper ───────────────────────────────────────────────────
 
+
 def _search(
     customer_id: str,
     query: str,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> list[dict[str, Any]]:
     from google.ads.googleads.errors import GoogleAdsException
 
@@ -61,8 +62,8 @@ def _search(
 def get_auction_insights(
     customer_id: str,
     days: int = 30,
-    campaign_id: Optional[str] = None,
-    login_customer_id: Optional[str] = None,
+    campaign_id: str | None = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return competitive auction insights — impression share, overlap rate,
@@ -132,7 +133,10 @@ def get_auction_insights(
         "data": rows,
         "date_range": date_range,
         "customer_id": normalize_customer_id(customer_id),
-        "note": "impression_share_pct fields are percentage (0–100). is_you=true rows are your own account.",
+        "note": (
+            "impression_share_pct fields are percentage (0–100)."
+            " is_you=true rows are your own account."
+        ),
     }
 
 
@@ -143,9 +147,9 @@ def get_auction_insights(
 def get_change_history(
     customer_id: str,
     days: int = 7,
-    resource_type: Optional[str] = None,
+    resource_type: str | None = None,
     limit: int = 500,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return account change history — who changed what, when, and what it changed from/to.
@@ -191,7 +195,10 @@ def get_change_history(
         "data": rows,
         "date_range": date_range,
         "count": len(rows),
-        "note": "user_email is empty for API/script changes. changed_fields lists proto field paths that were modified.",
+        "note": (
+            "user_email is empty for API/script changes."
+            " changed_fields lists proto field paths that were modified."
+        ),
     }
 
 
@@ -202,7 +209,7 @@ def get_change_history(
 def get_device_performance(
     customer_id: str,
     days: int = 30,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return campaign performance segmented by device — MOBILE, DESKTOP, TABLET.
@@ -258,7 +265,7 @@ def get_geo_performance(
     customer_id: str,
     days: int = 30,
     geo_level: str = "country",
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return performance segmented by geographic location.
@@ -282,7 +289,7 @@ def get_geo_performance(
         "region": "geographic_view.resource_name",
         "city": "geographic_view.resource_name",
     }
-    geo_field = level_map.get(geo_level, "geographic_view.country_criterion_id")
+    _geo_field = level_map.get(geo_level, "geographic_view.country_criterion_id")
 
     query = f"""
         SELECT
@@ -311,7 +318,10 @@ def get_geo_performance(
     return {
         "data": rows,
         "date_range": date_range,
-        "note": "country_criterion_id maps to geo target constants. Use execute_gaql on geo_target_constant to resolve names.",
+        "note": (
+            "country_criterion_id maps to geo target constants."
+            " Use execute_gaql on geo_target_constant to resolve names."
+        ),
     }
 
 
@@ -321,8 +331,8 @@ def get_geo_performance(
 @mcp.tool()
 def get_recommendations(
     customer_id: str,
-    recommendation_type: Optional[str] = None,
-    login_customer_id: Optional[str] = None,
+    recommendation_type: str | None = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return Google's optimization recommendations for the account.
@@ -375,7 +385,7 @@ def get_recommendations(
 def get_pmax_performance(
     customer_id: str,
     days: int = 30,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return Performance Max campaign and asset group performance.
@@ -461,7 +471,7 @@ def get_pmax_performance(
 def get_impression_share(
     customer_id: str,
     days: int = 30,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return search impression share and lost IS reasons by campaign.
@@ -508,5 +518,8 @@ def get_impression_share(
     return {
         "data": rows,
         "date_range": date_range,
-        "note": "search_rank_lost_impression_share = lost to ad rank (quality/bid). search_budget_lost_impression_share = lost to budget.",
+        "note": (
+            "search_rank_lost_impression_share = lost to ad rank (quality/bid)."
+            " search_budget_lost_impression_share = lost to budget."
+        ),
     }

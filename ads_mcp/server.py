@@ -13,14 +13,14 @@ Source notes:
 - Tool registration via import side-effects pattern from googleads/google-ads-mcp
 """
 
+import logging
 import os
 import sys
-import logging
 
 from ads_mcp.coordinator import mcp
 
 # Import tool modules to trigger @mcp.tool() registration
-from ads_mcp.tools import core, docs, audit, write  # noqa: F401
+from ads_mcp.tools import audit, core, docs, write  # noqa: F401
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,6 +40,7 @@ def _configure_remote_auth() -> None:
     if os.getenv("USE_GOOGLE_OAUTH_ACCESS_TOKEN"):
         try:
             from fastmcp.server.auth.providers.google import GoogleTokenVerifier
+
             mcp.auth = GoogleTokenVerifier()
             logger.info("Remote auth: GoogleTokenVerifier enabled.")
         except ImportError:
@@ -50,6 +51,7 @@ def _configure_remote_auth() -> None:
     if client_id and client_secret:
         try:
             from fastmcp.server.auth.providers.google import GoogleProvider
+
             base_url = os.getenv("FASTMCP_SERVER_BASE_URL", "http://localhost:8000")
             mcp.auth = GoogleProvider(
                 base_url=base_url,

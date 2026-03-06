@@ -3,7 +3,6 @@ Basic tests for Google Ads MCP utilities.
 Auth/API tests require real credentials and are integration tests only.
 """
 
-import pytest
 from ads_mcp.auth import normalize_customer_id
 from ads_mcp.utils import micros_to_currency
 

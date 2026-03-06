@@ -11,13 +11,14 @@ Usage:
 Source: google-ads-api-agent/scripts/validate.py (adapted for MCP tool layer)
 """
 
+import argparse
 import os
 import sys
-import argparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -59,6 +60,7 @@ def main():
     # ── Phase 1: File Structure ────────────────────────────────────────
     print("\n📁  Phase 1: Repository Structure")
     from pathlib import Path
+
     root = Path(__file__).resolve().parent.parent
 
     def file_check(path: str) -> bool:
@@ -84,24 +86,28 @@ def main():
 
     try:
         import anthropic
+
         results.append(ok("anthropic SDK", f"v{anthropic.__version__}"))
     except ImportError:
         results.append(fail("anthropic SDK", "pip install anthropic"))
 
     try:
         import google.ads.googleads
+
         results.append(ok("google-ads SDK", f"v{google.ads.googleads.__version__}"))
     except ImportError:
         results.append(fail("google-ads SDK", "pip install google-ads"))
 
     try:
         import fastmcp
+
         results.append(ok("fastmcp", f"v{fastmcp.__version__}"))
     except ImportError:
         results.append(fail("fastmcp", "pip install fastmcp"))
 
     try:
-        import yaml
+        import yaml  # noqa: F401
+
         results.append(ok("pyyaml"))
     except ImportError:
         warn("pyyaml not installed — YAML credential file won't work", "pip install pyyaml")
@@ -110,11 +116,13 @@ def main():
     print("\n🔧  Phase 3: Tool Registration")
     try:
         from ads_mcp.coordinator import mcp
-        from ads_mcp.tools import core, audit, write, docs  # noqa: F401
+        from ads_mcp.tools import audit, core, docs, write  # noqa: F401
+
         tool_list = list(mcp._tool_manager._tools.keys()) if hasattr(mcp, "_tool_manager") else []
         if not tool_list:
             # fallback count from scripts/cli.py
             from scripts.cli import TOOLS
+
             tool_list = list(TOOLS.keys())
         n = len(tool_list)
         if n >= 20:
@@ -155,11 +163,13 @@ def main():
         else:
             results.append(fail("Google Ads env vars", f"Missing: {', '.join(missing)}"))
     else:
-        results.append(fail(
-            "Google Ads credentials",
-            "No credentials found. Set GOOGLE_ADS_CREDENTIALS (path to google-ads.yaml), "
-            "OR set GOOGLE_ADS_DEVELOPER_TOKEN + CLIENT_ID + CLIENT_SECRET + REFRESH_TOKEN"
-        ))
+        results.append(
+            fail(
+                "Google Ads credentials",
+                "No credentials found. Set GOOGLE_ADS_CREDENTIALS (path to google-ads.yaml), "
+                "OR set GOOGLE_ADS_DEVELOPER_TOKEN + CLIENT_ID + CLIENT_SECRET + REFRESH_TOKEN",
+            )
+        )
 
     login_id = os.environ.get("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
     if login_id:
@@ -172,6 +182,7 @@ def main():
         print("\n🌐  Phase 5: Live Google Ads API")
         try:
             from ads_mcp.auth import get_ads_client
+
             client = get_ads_client()
             customer_service = client.get_service("CustomerService")
             result = customer_service.list_accessible_customers()
@@ -186,6 +197,7 @@ def main():
         print("\n🤖  Phase 6: Live Anthropic API")
         try:
             import anthropic as anth
+
             c = anth.Anthropic()
             resp = c.messages.create(
                 model="claude-haiku-4-5-20251001",

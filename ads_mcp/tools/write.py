@@ -10,7 +10,7 @@ explicitly pass confirm=True to trigger any mutation.
 Sources:
 - google-ads-api-agent (R5 / own repo):
     25_campaign_creator.py         → create_campaign
-    07_bid_keyword_manager.py      → update_keyword_bid, add_keywords, add_keywords_from_search_terms
+    07_bid_keyword_manager.py      → update_keyword_bid, add_keywords
     08_negative_keywords_manager.py → add_negative_keywords, remove_negative_keyword
     09_campaign_adgroup_manager.py  → update_campaign_status, create_ad_group
     05_budget_manager.py           → update_campaign_budget
@@ -19,13 +19,12 @@ Sources:
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from fastmcp.exceptions import ToolError
 
 from ads_mcp.auth import get_ads_client, normalize_customer_id
 from ads_mcp.coordinator import mcp
-from ads_mcp.utils import micros_to_currency
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ MICROS = 1_000_000
 # ─── Internal helpers ─────────────────────────────────────────────────────────
 
 
-def _client(login_customer_id: Optional[str] = None):
+def _client(login_customer_id: str | None = None):
     """Get an authenticated GoogleAdsClient."""
     c = get_ads_client()
     if login_customer_id:
@@ -69,7 +68,7 @@ def update_campaign_budget(
     campaign_id: str,
     new_daily_budget_dollars: float,
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Update a campaign's daily budget.
@@ -145,7 +144,7 @@ def update_campaign_status(
     campaign_id: str,
     status: str,
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Pause or enable a campaign.
@@ -207,7 +206,7 @@ def update_ad_group_status(
     ad_group_id: str,
     status: str,
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Pause or enable an ad group.
@@ -227,7 +226,11 @@ def update_ad_group_status(
     if status not in ("ENABLED", "PAUSED"):
         raise ToolError("status must be 'ENABLED' or 'PAUSED'")
 
-    preview = {"customer_id": normalize_customer_id(customer_id), "ad_group_id": ad_group_id, "new_status": status}
+    preview = {
+        "customer_id": normalize_customer_id(customer_id),
+        "ad_group_id": ad_group_id,
+        "new_status": status,
+    }
 
     if not confirm:
         return _dry_run_response("update_ad_group_status", preview)
@@ -241,8 +244,14 @@ def update_ad_group_status(
     op.update_mask.paths.append("status")
 
     try:
-        result = client.get_service("AdGroupService").mutate_ad_groups(customer_id=cid, operations=[op])
-        return {"status": "success", "ad_group_id": ad_group_id, "new_status": status, "resource_name": result.results[0].resource_name}
+        svc = client.get_service("AdGroupService")
+        result = svc.mutate_ad_groups(customer_id=cid, operations=[op])
+        return {
+            "status": "success",
+            "ad_group_id": ad_group_id,
+            "new_status": status,
+            "resource_name": result.results[0].resource_name,
+        }
     except GoogleAdsException as e:
         return _ads_error(e)
 
@@ -257,7 +266,7 @@ def update_keyword_bid(
     criterion_id: str,
     cpc_bid_dollars: float,
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Update the CPC bid for a specific keyword.
@@ -317,7 +326,7 @@ def add_keywords(
     ad_group_id: str,
     keywords: list[dict],
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Add keywords to an ad group.
@@ -406,7 +415,7 @@ def add_negative_keywords(
     keywords: list[str],
     match_type: str = "BROAD",
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Add negative keywords to a campaign.
@@ -476,7 +485,7 @@ def remove_negative_keyword(
     customer_id: str,
     resource_name: str,
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Remove a negative keyword by resource name.
@@ -512,7 +521,7 @@ def remove_negative_keyword(
         op = client.get_type("CampaignCriterionOperation")
         op.remove = resource_name
         try:
-            result = service.mutate_campaign_criteria(customer_id=cid, operations=[op])
+            service.mutate_campaign_criteria(customer_id=cid, operations=[op])
         except GoogleAdsException as e:
             return _ads_error(e)
     elif "sharedCriteria" in resource_name or "shared_criteria" in resource_name:
@@ -520,7 +529,7 @@ def remove_negative_keyword(
         op = client.get_type("SharedCriterionOperation")
         op.remove = resource_name
         try:
-            result = service.mutate_shared_criteria(customer_id=cid, operations=[op])
+            service.mutate_shared_criteria(customer_id=cid, operations=[op])
         except GoogleAdsException as e:
             return _ads_error(e)
     else:
@@ -542,14 +551,14 @@ def create_campaign(
     campaign_type: str,
     daily_budget_dollars: float,
     bidding_strategy: str = "MAXIMIZE_CONVERSIONS",
-    target_cpa: Optional[float] = None,
-    target_roas: Optional[float] = None,
-    geo_targets: Optional[list[str]] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
+    target_cpa: float | None = None,
+    target_roas: float | None = None,
+    geo_targets: list[str] | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     status: str = "PAUSED",
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a new campaign.
@@ -598,7 +607,11 @@ def create_campaign(
         "start_date": start_date,
         "end_date": end_date,
         "initial_status": status,
-        "warning": "Campaign will be PAUSED after creation. Enable manually when ready." if status == "PAUSED" else None,
+        "warning": (
+            "Campaign will be PAUSED after creation. Enable manually when ready."
+            if status == "PAUSED"
+            else None
+        ),
     }
 
     if not confirm:
@@ -753,10 +766,10 @@ def create_ad_group(
     customer_id: str,
     campaign_id: str,
     name: str,
-    cpc_bid_dollars: Optional[float] = None,
+    cpc_bid_dollars: float | None = None,
     status: str = "ENABLED",
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a new ad group within a campaign.
@@ -780,7 +793,9 @@ def create_ad_group(
         "customer_id": normalize_customer_id(customer_id),
         "campaign_id": campaign_id,
         "name": name,
-        "default_cpc_bid": f"${cpc_bid_dollars:.2f}" if cpc_bid_dollars else "inherits campaign default",
+        "default_cpc_bid": (
+            f"${cpc_bid_dollars:.2f}" if cpc_bid_dollars else "inherits campaign default"
+        ),
         "status": status,
     }
 
@@ -798,7 +813,8 @@ def create_ad_group(
         ag.cpc_bid_micros = int(cpc_bid_dollars * MICROS)
 
     try:
-        result = client.get_service("AdGroupService").mutate_ad_groups(customer_id=cid, operations=[op])
+        svc = client.get_service("AdGroupService")
+        result = svc.mutate_ad_groups(customer_id=cid, operations=[op])
         ad_group_id = result.results[0].resource_name.split("/")[-1]
         return {
             "status": "success",
@@ -819,11 +835,11 @@ def switch_bidding_strategy(
     customer_id: str,
     campaign_id: str,
     new_strategy: str,
-    target_cpa: Optional[float] = None,
-    target_roas: Optional[float] = None,
-    max_cpc_limit: Optional[float] = None,
+    target_cpa: float | None = None,
+    target_roas: float | None = None,
+    max_cpc_limit: float | None = None,
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Change a campaign's bidding strategy.
@@ -847,8 +863,12 @@ def switch_bidding_strategy(
 
     new_strategy = new_strategy.upper()
     valid_strategies = {
-        "MAXIMIZE_CONVERSIONS", "TARGET_CPA", "MAXIMIZE_CONVERSION_VALUE",
-        "TARGET_ROAS", "MAXIMIZE_CLICKS", "MANUAL_CPC",
+        "MAXIMIZE_CONVERSIONS",
+        "TARGET_CPA",
+        "MAXIMIZE_CONVERSION_VALUE",
+        "TARGET_ROAS",
+        "MAXIMIZE_CLICKS",
+        "MANUAL_CPC",
     }
     if new_strategy not in valid_strategies:
         raise ToolError(f"new_strategy must be one of: {', '.join(sorted(valid_strategies))}")
@@ -894,7 +914,8 @@ def switch_bidding_strategy(
             c.target_roas.cpc_bid_ceiling_micros = int(max_cpc_limit * MICROS)
         field_masks.append("target_roas")
     elif new_strategy == "MAXIMIZE_CLICKS":
-        c.maximize_clicks.cpc_bid_ceiling_micros = int(max_cpc_limit * MICROS) if max_cpc_limit else 0
+        ceiling = int(max_cpc_limit * MICROS) if max_cpc_limit else 0
+        c.maximize_clicks.cpc_bid_ceiling_micros = ceiling
         field_masks.append("maximize_clicks")
     elif new_strategy == "MANUAL_CPC":
         c.manual_cpc.enhanced_cpc_enabled = True
@@ -925,9 +946,9 @@ def generic_mutate(
     resource_type: str,
     operation_type: str,
     resource_data: dict,
-    update_fields: Optional[list[str]] = None,
+    update_fields: list[str] | None = None,
     confirm: bool = False,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Generic mutate operation for advanced use cases not covered by specific tools.
@@ -954,17 +975,28 @@ def generic_mutate(
     SERVICE_MAP = {
         "campaign": ("CampaignService", "mutate_campaigns", "CampaignOperation"),
         "ad_group": ("AdGroupService", "mutate_ad_groups", "AdGroupOperation"),
-        "ad_group_criterion": ("AdGroupCriterionService", "mutate_ad_group_criteria", "AdGroupCriterionOperation"),
+        "ad_group_criterion": (
+            "AdGroupCriterionService",
+            "mutate_ad_group_criteria",
+            "AdGroupCriterionOperation",
+        ),
         "ad_group_ad": ("AdGroupAdService", "mutate_ad_group_ads", "AdGroupAdOperation"),
-        "campaign_budget": ("CampaignBudgetService", "mutate_campaign_budgets", "CampaignBudgetOperation"),
-        "campaign_criterion": ("CampaignCriterionService", "mutate_campaign_criteria", "CampaignCriterionOperation"),
+        "campaign_budget": (
+            "CampaignBudgetService",
+            "mutate_campaign_budgets",
+            "CampaignBudgetOperation",
+        ),
+        "campaign_criterion": (
+            "CampaignCriterionService",
+            "mutate_campaign_criteria",
+            "CampaignCriterionOperation",
+        ),
     }
 
     rt = resource_type.lower()
     if rt not in SERVICE_MAP:
         raise ToolError(
-            f"Unsupported resource_type '{resource_type}'. "
-            f"Supported: {list(SERVICE_MAP.keys())}"
+            f"Unsupported resource_type '{resource_type}'. Supported: {list(SERVICE_MAP.keys())}"
         )
 
     op_type = operation_type.lower()

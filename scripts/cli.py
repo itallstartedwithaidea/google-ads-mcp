@@ -13,38 +13,54 @@ Usage:
 Source: google-ads-api-agent/scripts/cli.py (adapted for MCP tool layer)
 """
 
+import argparse
+import json
+import logging
 import os
 import sys
-import argparse
-import logging
-import json
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
-import anthropic
+import anthropic  # noqa: E402
 
-from ads_mcp.tools.core import (
-    list_accessible_customers, list_accounts, execute_gaql,
-    get_campaign_performance, get_keyword_performance,
-    get_search_terms, get_ad_performance,
-    get_account_budget_summary, generate_keyword_ideas,
+from ads_mcp.tools.audit import (  # noqa: E402
+    get_auction_insights,
+    get_change_history,
+    get_device_performance,
+    get_geo_performance,
+    get_impression_share,
+    get_pmax_performance,
+    get_recommendations,
 )
-from ads_mcp.tools.audit import (
-    get_auction_insights, get_change_history,
-    get_device_performance, get_geo_performance,
-    get_recommendations, get_pmax_performance, get_impression_share,
+from ads_mcp.tools.core import (  # noqa: E402
+    execute_gaql,
+    generate_keyword_ideas,
+    get_account_budget_summary,
+    get_ad_performance,
+    get_campaign_performance,
+    get_keyword_performance,
+    get_search_terms,
+    list_accessible_customers,
+    list_accounts,
 )
-from ads_mcp.tools.write import (
-    update_campaign_budget, update_campaign_status, update_ad_group_status,
-    update_keyword_bid, add_keywords, add_negative_keywords,
-    remove_negative_keyword, create_campaign, create_ad_group,
-    switch_bidding_strategy, generic_mutate,
+from ads_mcp.tools.docs import get_gaql_reference, get_workflow_guide  # noqa: E402
+from ads_mcp.tools.write import (  # noqa: E402
+    add_keywords,
+    add_negative_keywords,
+    create_ad_group,
+    create_campaign,
+    generic_mutate,
+    remove_negative_keyword,
+    switch_bidding_strategy,
+    update_ad_group_status,
+    update_campaign_budget,
+    update_campaign_status,
+    update_keyword_bid,
 )
-from ads_mcp.tools.docs import get_gaql_reference, get_workflow_guide
-
 
 # ─── Tool registry: name → callable ───────────────────────────────────────────
 
@@ -160,15 +176,17 @@ def _build_tool_schemas() -> list[dict]:
 
             props[param_name] = prop
 
-        schemas.append({
-            "name": name,
-            "description": doc[:1000],
-            "input_schema": {
-                "type": "object",
-                "properties": props,
-                "required": required,
-            },
-        })
+        schemas.append(
+            {
+                "name": name,
+                "description": doc[:1000],
+                "input_schema": {
+                    "type": "object",
+                    "properties": props,
+                    "required": required,
+                },
+            }
+        )
 
     return schemas
 
@@ -219,11 +237,13 @@ class GoogleAdsAgent:
                     except Exception as exc:
                         result = {"error": str(exc)}
 
-                tool_results.append({
-                    "type": "tool_result",
-                    "tool_use_id": block.id,
-                    "content": json.dumps(result, default=str),
-                })
+                tool_results.append(
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": json.dumps(result, default=str),
+                    }
+                )
 
             self.history.append({"role": "user", "content": tool_results})
 

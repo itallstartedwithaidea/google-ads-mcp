@@ -22,7 +22,6 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 from dotenv import load_dotenv
 from google.ads.googleads.client import GoogleAdsClient
@@ -67,7 +66,7 @@ def normalize_customer_id(raw: str) -> str:
 # ─── GoogleAdsClient factory ───────────────────────────────────────────────────
 
 
-def _client_from_yaml(access_token: Optional[str] = None) -> GoogleAdsClient:
+def _client_from_yaml(access_token: str | None = None) -> GoogleAdsClient:
     """
     Build a GoogleAdsClient from a google-ads.yaml file.
 
@@ -85,7 +84,7 @@ def _client_from_yaml(access_token: Optional[str] = None) -> GoogleAdsClient:
     if access_token:
         import yaml
 
-        with open(CREDENTIALS_YAML, "r", encoding="utf-8") as f:
+        with open(CREDENTIALS_YAML, encoding="utf-8") as f:
             ads_config = yaml.safe_load(f)
         creds = Credentials(access_token)
         return GoogleAdsClient(
@@ -118,7 +117,7 @@ def _client_from_oauth() -> GoogleAdsClient:
     config_dir = Path(OAUTH_CONFIG_PATH).parent
     token_path = config_dir / "google_ads_token.json"
 
-    creds: Optional[Credentials] = None
+    creds: Credentials | None = None
 
     # Load cached token
     if token_path.exists():
@@ -166,10 +165,10 @@ def _client_from_oauth() -> GoogleAdsClient:
 
 # ─── Public API ───────────────────────────────────────────────────────────────
 
-_cached_client: Optional[GoogleAdsClient] = None
+_cached_client: GoogleAdsClient | None = None
 
 
-def get_ads_client(access_token: Optional[str] = None) -> GoogleAdsClient:
+def get_ads_client(access_token: str | None = None) -> GoogleAdsClient:
     """
     Return a configured GoogleAdsClient using the best available strategy.
 
@@ -194,7 +193,7 @@ def get_ads_client(access_token: Optional[str] = None) -> GoogleAdsClient:
     elif OAUTH_CONFIG_PATH:
         _cached_client = _client_from_oauth()
     else:
-        raise EnvironmentError(
+        raise OSError(
             "No credentials found. Provide one of:\n"
             "  • GOOGLE_ADS_CREDENTIALS pointing to a google-ads.yaml\n"
             "  • GOOGLE_ADS_OAUTH_CONFIG_PATH pointing to an OAuth client JSON"

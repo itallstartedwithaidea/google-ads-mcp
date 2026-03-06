@@ -31,9 +31,7 @@ def format_value(value: Any) -> Any:
     if isinstance(value, proto.marshal.collections.repeated.Repeated):
         return [format_value(i) for i in value]
     if isinstance(value, proto.Message):
-        return json.loads(
-            proto.Message.to_json(value, use_integers_for_enums=False)
-        )
+        return json.loads(proto.Message.to_json(value, use_integers_for_enums=False))
     if isinstance(value, proto.Enum):
         return value.name
     return value

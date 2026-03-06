@@ -15,7 +15,7 @@ Design synthesis:
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from fastmcp.exceptions import ToolError
 from google.ads.googleads.errors import GoogleAdsException
@@ -46,7 +46,7 @@ def _preprocess_gaql(query: str) -> str:
 def _run_search(
     customer_id: str,
     query: str,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """
     Execute a GAQL query and return a list of plain dicts.
@@ -114,10 +114,19 @@ def list_accounts() -> dict[str, Any]:
     accounts: list[dict[str, Any]] = []
     seen: set[str] = set()
 
-    def _account_meta(cid: str, level: int = 0, parent_id: Optional[str] = None) -> dict:
-        rows = _run_search(cid, "SELECT customer.id, customer.descriptive_name, customer.manager FROM customer LIMIT 1")
+    def _account_meta(cid: str, level: int = 0, parent_id: str | None = None) -> dict:
+        query = (
+            "SELECT customer.id, customer.descriptive_name, customer.manager FROM customer LIMIT 1"
+        )
+        rows = _run_search(cid, query)
         if not rows:
-            return {"id": cid, "name": f"Account {cid}", "is_manager": False, "level": level, "parent_id": parent_id}
+            return {
+                "id": cid,
+                "name": f"Account {cid}",
+                "is_manager": False,
+                "level": level,
+                "parent_id": parent_id,
+            }
         r = rows[0]
         return {
             "id": normalize_customer_id(str(r.get("customer.id", cid))),
@@ -140,13 +149,15 @@ def list_accounts() -> dict[str, Any]:
         subs = []
         for r in rows:
             cid = normalize_customer_id(str(r.get("customer_client.id", "")))
-            subs.append({
-                "id": cid,
-                "name": r.get("customer_client.descriptive_name", f"Account {cid}"),
-                "is_manager": bool(r.get("customer_client.manager", False)),
-                "level": level,
-                "parent_id": manager_id,
-            })
+            subs.append(
+                {
+                    "id": cid,
+                    "name": r.get("customer_client.descriptive_name", f"Account {cid}"),
+                    "is_manager": bool(r.get("customer_client.manager", False)),
+                    "level": level,
+                    "parent_id": manager_id,
+                }
+            )
         return subs
 
     for top_id in top_level_ids:
@@ -184,7 +195,7 @@ def list_accounts() -> dict[str, Any]:
 def execute_gaql(
     query: str,
     customer_id: str,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Execute any Google Ads Query Language (GAQL) query.
@@ -226,7 +237,7 @@ def execute_gaql(
 def get_campaign_performance(
     customer_id: str,
     days: int = 30,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return campaign performance metrics for the last N days.
@@ -272,7 +283,11 @@ def get_campaign_performance(
         cost_micros = r.get("metrics.cost_micros", 0) or 0
         r["metrics.cost"] = micros_to_currency(int(cost_micros))
 
-    return {"data": rows, "date_range": date_range, "customer_id": normalize_customer_id(customer_id)}
+    return {
+        "data": rows,
+        "date_range": date_range,
+        "customer_id": normalize_customer_id(customer_id),
+    }
 
 
 @mcp.tool()
@@ -280,7 +295,7 @@ def get_keyword_performance(
     customer_id: str,
     days: int = 30,
     min_impressions: int = 0,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return keyword performance metrics.
@@ -334,7 +349,7 @@ def get_search_terms(
     customer_id: str,
     days: int = 30,
     min_clicks: int = 1,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return search term performance — actual queries that triggered your ads.
@@ -383,7 +398,7 @@ def get_search_terms(
 def get_ad_performance(
     customer_id: str,
     days: int = 30,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return ad-level performance including RSA headlines and descriptions.
@@ -438,7 +453,7 @@ def get_ad_performance(
 @mcp.tool()
 def get_account_budget_summary(
     customer_id: str,
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Return campaign budgets and current spend for budget pacing analysis.
@@ -479,10 +494,10 @@ def get_account_budget_summary(
 def generate_keyword_ideas(
     customer_id: str,
     keywords: list[str],
-    page_url: Optional[str] = None,
+    page_url: str | None = None,
     language_id: str = "1000",
     geo_target_id: str = "2840",
-    login_customer_id: Optional[str] = None,
+    login_customer_id: str | None = None,
 ) -> dict[str, Any]:
     """
     Generate keyword ideas using the Google Ads Keyword Planner.
@@ -514,9 +529,7 @@ def generate_keyword_ideas(
     request.customer_id = normalize_customer_id(customer_id)
     request.language = f"languageConstants/{language_id}"
     request.geo_target_constants.append(f"geoTargetConstants/{geo_target_id}")
-    request.keyword_plan_network = (
-        client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
-    )
+    request.keyword_plan_network = client.enums.KeywordPlanNetworkEnum.GOOGLE_SEARCH_AND_PARTNERS
 
     if keywords and page_url:
         request.keyword_and_url_seed.url = page_url
@@ -534,14 +547,16 @@ def generate_keyword_ideas(
     ideas = []
     for idea in response.results:
         m = idea.keyword_idea_metrics
-        ideas.append({
-            "keyword": idea.text,
-            "avg_monthly_searches": m.avg_monthly_searches,
-            "competition": m.competition.name,
-            "competition_index": m.competition_index,
-            "low_top_of_page_bid": micros_to_currency(m.low_top_of_page_bid_micros),
-            "high_top_of_page_bid": micros_to_currency(m.high_top_of_page_bid_micros),
-        })
+        ideas.append(
+            {
+                "keyword": idea.text,
+                "avg_monthly_searches": m.avg_monthly_searches,
+                "competition": m.competition.name,
+                "competition_index": m.competition_index,
+                "low_top_of_page_bid": micros_to_currency(m.low_top_of_page_bid_micros),
+                "high_top_of_page_bid": micros_to_currency(m.high_top_of_page_bid_micros),
+            }
+        )
 
     return {
         "keyword_ideas": ideas,
