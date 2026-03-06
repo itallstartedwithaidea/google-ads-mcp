@@ -97,7 +97,7 @@ server = MCPServerStdio(
         "GOOGLE_ADS_LOGIN_CUSTOMER_ID": os.environ.get("GOOGLE_ADS_LOGIN_CUSTOMER_ID", ""),
     }
 )
-# All 23+ Google Ads tools automatically available
+# All 29 Google Ads tools automatically available
 ```
 
 ---
@@ -145,7 +145,7 @@ Full credential setup guide: [google-ads-api-agent README → Step 1A](https://g
 ## v23 Service Coverage
 
 Google Ads API v23 has 70+ services. Current status:
-- ✅ **23 tools implemented** — core reporting, audit, write operations
+- ✅ **29 tools implemented** — core reporting, audit, write operations, doc references
 - 🔧 **42 services planned** — full roadmap in [`docs/SERVICES.md`](docs/SERVICES.md)
 - ⬜ **~20 out of scope** — platform admin, deprecated, LSA-specific
 
@@ -179,6 +179,14 @@ Google Ads API v23 has 70+ services. Current status:
 > negative keywords, geo targeting, PMax reporting, Filter-First Architecture
 
 Full per-feature attribution table: [`docs/SERVICES.md`](docs/SERVICES.md)
+
+---
+
+## Related
+
+- **[google-ads-api-agent](https://github.com/itallstartedwithaidea/google-ads-api-agent)** — Full Python agent with 28 API actions and 6 sub-agents
+- **[google-ads-gemini-extension](https://github.com/itallstartedwithaidea/google-ads-gemini-extension)** — Gemini CLI extension with 22 MCP tools, skills, commands, and themes
+- **[googleadsagent.ai](https://googleadsagent.ai)** — Production deployment (Buddy) on Cloudflare with semantic memory, billing, and monitoring
 
 ---
 
