@@ -83,6 +83,44 @@ to orient itself — it reads this first on every session.
 
 ---
 
+## Gemini CLI
+
+Add to your project's `.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "google-ads": {
+      "command": "python",
+      "args": ["-m", "ads_mcp.server"],
+      "env": {
+        "GOOGLE_ADS_CREDENTIALS": "/path/to/google-ads.yaml",
+        "GOOGLE_ADS_LOGIN_CUSTOMER_ID": "1234567890"
+      }
+    }
+  }
+}
+```
+
+For the full Gemini CLI setup with Google Ads slash commands and agent skills, see
+[gemini-cli-googleadsagent](https://github.com/itallstartedwithaidea/gemini-cli-googleadsagent).
+
+**Remote option** — if you deploy the
+[buddy-agent](https://github.com/itallstartedwithaidea/googleadsagent-site/tree/main/workers/buddy-agent)
+on Cloudflare Workers, you can skip local credentials entirely and connect via SSE:
+
+```json
+{
+  "mcpServers": {
+    "buddy-google-ads": {
+      "url": "https://your-buddy-agent.workers.dev/sse"
+    }
+  }
+}
+```
+
+---
+
 ## OpenAI Agents SDK
 
 ```python
