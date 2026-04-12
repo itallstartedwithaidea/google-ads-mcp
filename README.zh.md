@@ -1,13 +1,13 @@
 # googleadsagent-mcp
 
-An MCP (Model Context Protocol) server + standalone agent SDK for the Google Ads API.  
-Built by [googleadsagent.ai](https://googleadsagent.ai) · MIT License
+一个用于 Google Ads API 的 MCP（Model Context Protocol）服务器 + 独立代理 SDK。  
+由 [googleadsagent.ai](https://googleadsagent.ai) 构建 · MIT 许可证
 
 [English](README.md) | [Français](README.fr.md) | [Español](README.es.md) | [中文](README.zh.md) | [Nederlands](README.nl.md) | [Русский](README.ru.md) | [한국어](README.ko.md)
 
 ---
 
-## Install
+## 安装
 
 ```bash
 # From PyPI (once published)
@@ -25,20 +25,20 @@ git clone https://github.com/itallstartedwithaidea/google-ads-mcp.git && cd goog
 
 ---
 
-## Works with every MCP client
+## 兼容所有 MCP 客户端
 
-| Client | Transport | Config |
+| 客户端 | 传输方式 | 配置 |
 |---|---|---|
-| **Claude Code** | stdio | `.mcp.json` in project root (included) |
+| **Claude Code** | stdio | 项目根目录的 `.mcp.json`（已包含） |
 | **Claude Desktop** | stdio | `claude_desktop_config.example.json` |
-| **Cursor / Windsurf** | stdio | Settings → MCP → `python -m ads_mcp.server` |
+| **Cursor / Windsurf** | stdio | 设置 → MCP → `python -m ads_mcp.server` |
 | **OpenAI Agents SDK** | stdio | `MCPServerStdio(command="python", args=["-m", "ads_mcp.server"])` |
 | **LangChain** | stdio | `langchain-mcp-adapters` |
-| **Remote / Cloud** | HTTP SSE | `python -m ads_mcp.server --http` |
+| **远程 / 云端** | HTTP SSE | `python -m ads_mcp.server --http` |
 
 ---
 
-## Quick Start
+## 快速开始
 
 ```bash
 # 1. Copy and fill credentials
@@ -62,7 +62,7 @@ python scripts/cli.py --single "Show campaign performance for account 1234567890
 
 ## Claude Code
 
-Place `.mcp.json` in your project root (already included):
+将 `.mcp.json` 放置在项目根目录（已包含）：
 
 ```json
 {
@@ -80,14 +80,13 @@ Place `.mcp.json` in your project root (already included):
 }
 ```
 
-Claude Code auto-discovers `.mcp.json`. `CLAUDE.md` is written specifically for Claude Code
-to orient itself — it reads this first on every session.
+Claude Code 会自动发现 `.mcp.json`。`CLAUDE.md` 是专门为 Claude Code 编写的定向文件——每次会话开始时会首先读取它。
 
 ---
 
 ## Gemini CLI
 
-Add to your project's `.gemini/settings.json`:
+添加到项目的 `.gemini/settings.json` 中：
 
 ```json
 {
@@ -104,12 +103,12 @@ Add to your project's `.gemini/settings.json`:
 }
 ```
 
-For the full Gemini CLI setup with Google Ads slash commands and agent skills, see
-[gemini-cli-googleadsagent](https://github.com/itallstartedwithaidea/gemini-cli-googleadsagent).
+要了解包含 Google Ads 斜杠命令和代理技能的完整 Gemini CLI 设置，请参阅
+[gemini-cli-googleadsagent](https://github.com/itallstartedwithaidea/gemini-cli-googleadsagent)。
 
-**Remote option** — if you deploy the
-[buddy-agent](https://github.com/itallstartedwithaidea/googleadsagent-site/tree/main/workers/buddy-agent)
-on Cloudflare Workers, you can skip local credentials entirely and connect via SSE:
+**远程选项** — 如果您在 Cloudflare Workers 上部署了
+[buddy-agent](https://github.com/itallstartedwithaidea/googleadsagent-site/tree/main/workers/buddy-agent)，
+可以完全跳过本地凭据，通过 SSE 连接：
 
 ```json
 {
@@ -142,28 +141,28 @@ server = MCPServerStdio(
 
 ---
 
-## Tool Reference
+## 工具参考
 
-### Read Tools
+### 读取工具
 `list_accessible_customers` · `list_accounts` · `execute_gaql` · `get_campaign_performance`
 `get_keyword_performance` · `get_search_terms` · `get_ad_performance` · `get_account_budget_summary`
 `generate_keyword_ideas`
 
-### Audit Tools
+### 审计工具
 `get_auction_insights` · `get_change_history` · `get_device_performance` · `get_geo_performance`
 `get_recommendations` · `get_pmax_performance` · `get_impression_share`
 
-### Write Tools (dry-run by default — requires `confirm=True`)
+### 写入工具（默认模拟运行 — 需要 `confirm=True`）
 `update_campaign_budget` · `update_campaign_status` · `update_ad_group_status` · `update_keyword_bid`
 `add_keywords` · `add_negative_keywords` · `remove_negative_keyword` · `create_campaign`
 `create_ad_group` · `switch_bidding_strategy` · `generic_mutate`
 
-### Doc Tools
+### 文档工具
 `get_gaql_reference` · `get_workflow_guide`
 
 ---
 
-## Credentials
+## 凭据
 
 ```env
 # Option 1: google-ads.yaml path (recommended)
@@ -178,65 +177,65 @@ GOOGLE_ADS_REFRESH_TOKEN=...
 GOOGLE_ADS_LOGIN_CUSTOMER_ID=123-456-7890
 ```
 
-Full credential setup guide: [google-ads-api-agent README → Step 1A](https://github.com/itallstartedwithaidea/google-ads-api-agent#1a-google-ads-api-credentials)
+完整凭据设置指南：[google-ads-api-agent README → 步骤 1A](https://github.com/itallstartedwithaidea/google-ads-api-agent#1a-google-ads-api-credentials)
 
 ---
 
-## v23 Service Coverage
+## v23 服务覆盖
 
-Google Ads API v23 has 70+ services. Current status:
-- ✅ **29 tools implemented** — core reporting, audit, write operations, doc references
-- 🔧 **42 services planned** — full roadmap in [`docs/SERVICES.md`](docs/SERVICES.md)
-- ⬜ **~20 out of scope** — platform admin, deprecated, LSA-specific
+Google Ads API v23 拥有 70 多项服务。当前状态：
+- ✅ **已实现 29 个工具** — 核心报告、审计、写入操作、文档参考
+- 🔧 **计划中 42 项服务** — 完整路线图见 [`docs/SERVICES.md`](docs/SERVICES.md)
+- ⬜ **约 20 项超出范围** — 平台管理、已弃用、LSA 专属
 
 ---
 
-## Attribution
+## 归属声明
 
 ### Google LLC (Apache 2.0)
 
-> **google-ads Python client library** — Copyright 2023 Google LLC  
+> **google-ads Python 客户端库** — Copyright 2023 Google LLC  
 > https://github.com/googleads/google-ads-python  
-> All API calls in this package use the `google-ads` pip package published by Google.
-> The v23 service definitions, proto types, and gRPC clients are Google's work.
+> 本包中的所有 API 调用均使用 Google 发布的 `google-ads` pip 包。
+> v23 服务定义、proto 类型和 gRPC 客户端均为 Google 的成果。
 
 > **googleads/google-ads-mcp** — https://github.com/googleads/google-ads-mcp  
-> Patterns: MCP singleton, `search_stream` + `field_mask.paths`
+> 模式：MCP 单例、`search_stream` + `field_mask.paths`
 
 > **google-marketing-solutions/google_ads_mcp** — https://github.com/google-marketing-solutions/google_ads_mcp  
-> Patterns: doc-serving MCP tools, remote OAuth, `omit_unselected_resource_names`
+> 模式：文档服务 MCP 工具、远程 OAuth、`omit_unselected_resource_names`
 
-### Community (MIT)
+### 社区 (MIT)
 
 > **cohnen/mcp-google-ads** — https://github.com/cohnen/mcp-google-ads  
-> Patterns: `format_value` proto serialization helper
+> 模式：`format_value` proto 序列化辅助工具
 
 > **gomarble-ai/google-ads-mcp-server** — https://github.com/gomarble-ai/google-ads-mcp-server  
-> Patterns: dual transport (stdio + HTTP), KeywordPlanIdeaService
+> 模式：双传输（stdio + HTTP）、KeywordPlanIdeaService
 
 > **itallstartedwithaidea/google-ads-api-agent** — https://github.com/itallstartedwithaidea/google-ads-api-agent  
-> Patterns: auction insights, change history, campaign creator, bidding strategy manager,
-> negative keywords, geo targeting, PMax reporting, Filter-First Architecture
+> 模式：竞价洞察、变更历史、广告系列创建器、出价策略管理器、
+> 否定关键词、地理定位、PMax 报告、Filter-First 架构
 
-Full per-feature attribution table: [`docs/SERVICES.md`](docs/SERVICES.md)
-
----
-
-## Related
-
-- **[google-ads-skills](https://github.com/itallstartedwithaidea/google-ads-skills)** — Anthropic Agent Skills for Claude (analysis, audit, write, math, MCP)
-- **[google-ads-api-agent](https://github.com/itallstartedwithaidea/google-ads-api-agent)** — Full Python agent with 28 API actions and 6 sub-agents
-- **[google-ads-gemini-extension](https://github.com/itallstartedwithaidea/google-ads-gemini-extension)** — Gemini CLI extension with 22 MCP tools, skills, commands, and themes
-- **[googleadsagent.ai](https://googleadsagent.ai)** — Production deployment (Buddy) on Cloudflare with semantic memory, billing, and monitoring
+按功能的详细归属表：[`docs/SERVICES.md`](docs/SERVICES.md)
 
 ---
 
-## License
+## 相关项目
 
-MIT — see [LICENSE](LICENSE)  
-`google-ads` dependency: Apache 2.0, Copyright 2023 Google LLC  
-FastMCP: Apache 2.0
+- **[google-ads-skills](https://github.com/itallstartedwithaidea/google-ads-skills)** — 用于 Claude 的 Anthropic Agent 技能（分析、审计、写入、数学、MCP）
+- **[google-ads-api-agent](https://github.com/itallstartedwithaidea/google-ads-api-agent)** — 完整的 Python 代理，包含 28 个 API 操作和 6 个子代理
+- **[google-ads-gemini-extension](https://github.com/itallstartedwithaidea/google-ads-gemini-extension)** — Gemini CLI 扩展，包含 22 个 MCP 工具、技能、命令和主题
+- **[googleadsagent.ai](https://googleadsagent.ai)** — 生产部署（Buddy），运行在 Cloudflare 上，具备语义记忆、计费和监控功能
 
 ---
 
-[googleadsagent.ai](https://googleadsagent.ai) · [Google Ads API Docs](https://developers.google.com/google-ads/api) · [MCP Spec](https://modelcontextprotocol.io)
+## 许可证
+
+MIT — 参见 [LICENSE](LICENSE)  
+`google-ads` 依赖：Apache 2.0，Copyright 2023 Google LLC  
+FastMCP：Apache 2.0
+
+---
+
+[googleadsagent.ai](https://googleadsagent.ai) · [Google Ads API 文档](https://developers.google.com/google-ads/api) · [MCP 规范](https://modelcontextprotocol.io)

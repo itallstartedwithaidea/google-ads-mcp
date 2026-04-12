@@ -1,13 +1,13 @@
 # googleadsagent-mcp
 
-An MCP (Model Context Protocol) server + standalone agent SDK for the Google Ads API.  
-Built by [googleadsagent.ai](https://googleadsagent.ai) · MIT License
+Een MCP (Model Context Protocol) server + zelfstandige agent-SDK voor de Google Ads API.  
+Gebouwd door [googleadsagent.ai](https://googleadsagent.ai) · MIT-licentie
 
 [English](README.md) | [Français](README.fr.md) | [Español](README.es.md) | [中文](README.zh.md) | [Nederlands](README.nl.md) | [Русский](README.ru.md) | [한국어](README.ko.md)
 
 ---
 
-## Install
+## Installatie
 
 ```bash
 # From PyPI (once published)
@@ -25,20 +25,20 @@ git clone https://github.com/itallstartedwithaidea/google-ads-mcp.git && cd goog
 
 ---
 
-## Works with every MCP client
+## Werkt met elke MCP-client
 
-| Client | Transport | Config |
+| Client | Transport | Configuratie |
 |---|---|---|
-| **Claude Code** | stdio | `.mcp.json` in project root (included) |
+| **Claude Code** | stdio | `.mcp.json` in de projectroot (inbegrepen) |
 | **Claude Desktop** | stdio | `claude_desktop_config.example.json` |
-| **Cursor / Windsurf** | stdio | Settings → MCP → `python -m ads_mcp.server` |
+| **Cursor / Windsurf** | stdio | Instellingen → MCP → `python -m ads_mcp.server` |
 | **OpenAI Agents SDK** | stdio | `MCPServerStdio(command="python", args=["-m", "ads_mcp.server"])` |
 | **LangChain** | stdio | `langchain-mcp-adapters` |
-| **Remote / Cloud** | HTTP SSE | `python -m ads_mcp.server --http` |
+| **Extern / Cloud** | HTTP SSE | `python -m ads_mcp.server --http` |
 
 ---
 
-## Quick Start
+## Snelstart
 
 ```bash
 # 1. Copy and fill credentials
@@ -62,7 +62,7 @@ python scripts/cli.py --single "Show campaign performance for account 1234567890
 
 ## Claude Code
 
-Place `.mcp.json` in your project root (already included):
+Plaats `.mcp.json` in je projectroot (al inbegrepen):
 
 ```json
 {
@@ -80,14 +80,14 @@ Place `.mcp.json` in your project root (already included):
 }
 ```
 
-Claude Code auto-discovers `.mcp.json`. `CLAUDE.md` is written specifically for Claude Code
-to orient itself — it reads this first on every session.
+Claude Code detecteert `.mcp.json` automatisch. `CLAUDE.md` is specifiek geschreven zodat Claude Code
+zich kan oriënteren — het leest dit als eerste bij elke sessie.
 
 ---
 
 ## Gemini CLI
 
-Add to your project's `.gemini/settings.json`:
+Voeg toe aan het `.gemini/settings.json`-bestand van je project:
 
 ```json
 {
@@ -104,12 +104,12 @@ Add to your project's `.gemini/settings.json`:
 }
 ```
 
-For the full Gemini CLI setup with Google Ads slash commands and agent skills, see
+Voor de volledige Gemini CLI-configuratie met Google Ads slash-commando's en agent-vaardigheden, zie
 [gemini-cli-googleadsagent](https://github.com/itallstartedwithaidea/gemini-cli-googleadsagent).
 
-**Remote option** — if you deploy the
+**Externe optie** — als je de
 [buddy-agent](https://github.com/itallstartedwithaidea/googleadsagent-site/tree/main/workers/buddy-agent)
-on Cloudflare Workers, you can skip local credentials entirely and connect via SSE:
+op Cloudflare Workers deployt, kun je lokale inloggegevens volledig overslaan en verbinden via SSE:
 
 ```json
 {
@@ -142,28 +142,28 @@ server = MCPServerStdio(
 
 ---
 
-## Tool Reference
+## Toolreferentie
 
-### Read Tools
+### Leestools
 `list_accessible_customers` · `list_accounts` · `execute_gaql` · `get_campaign_performance`
 `get_keyword_performance` · `get_search_terms` · `get_ad_performance` · `get_account_budget_summary`
 `generate_keyword_ideas`
 
-### Audit Tools
+### Audittools
 `get_auction_insights` · `get_change_history` · `get_device_performance` · `get_geo_performance`
 `get_recommendations` · `get_pmax_performance` · `get_impression_share`
 
-### Write Tools (dry-run by default — requires `confirm=True`)
+### Schrijftools (droogloop standaard — vereist `confirm=True`)
 `update_campaign_budget` · `update_campaign_status` · `update_ad_group_status` · `update_keyword_bid`
 `add_keywords` · `add_negative_keywords` · `remove_negative_keyword` · `create_campaign`
 `create_ad_group` · `switch_bidding_strategy` · `generic_mutate`
 
-### Doc Tools
+### Documentatietools
 `get_gaql_reference` · `get_workflow_guide`
 
 ---
 
-## Credentials
+## Inloggegevens
 
 ```env
 # Option 1: google-ads.yaml path (recommended)
@@ -178,65 +178,65 @@ GOOGLE_ADS_REFRESH_TOKEN=...
 GOOGLE_ADS_LOGIN_CUSTOMER_ID=123-456-7890
 ```
 
-Full credential setup guide: [google-ads-api-agent README → Step 1A](https://github.com/itallstartedwithaidea/google-ads-api-agent#1a-google-ads-api-credentials)
+Volledige handleiding voor het instellen van inloggegevens: [google-ads-api-agent README → Stap 1A](https://github.com/itallstartedwithaidea/google-ads-api-agent#1a-google-ads-api-credentials)
 
 ---
 
-## v23 Service Coverage
+## v23-servicedekking
 
-Google Ads API v23 has 70+ services. Current status:
-- ✅ **29 tools implemented** — core reporting, audit, write operations, doc references
-- 🔧 **42 services planned** — full roadmap in [`docs/SERVICES.md`](docs/SERVICES.md)
-- ⬜ **~20 out of scope** — platform admin, deprecated, LSA-specific
+Google Ads API v23 heeft meer dan 70 services. Huidige status:
+- ✅ **29 tools geïmplementeerd** — kernrapportage, audit, schrijfbewerkingen, documentatiereferenties
+- 🔧 **42 services gepland** — volledige routekaart in [`docs/SERVICES.md`](docs/SERVICES.md)
+- ⬜ **~20 buiten bereik** — platformbeheer, verouderd, LSA-specifiek
 
 ---
 
-## Attribution
+## Bronvermelding
 
 ### Google LLC (Apache 2.0)
 
-> **google-ads Python client library** — Copyright 2023 Google LLC  
+> **google-ads Python-clientbibliotheek** — Copyright 2023 Google LLC  
 > https://github.com/googleads/google-ads-python  
-> All API calls in this package use the `google-ads` pip package published by Google.
-> The v23 service definitions, proto types, and gRPC clients are Google's work.
+> Alle API-aanroepen in dit pakket gebruiken het `google-ads` pip-pakket gepubliceerd door Google.
+> De v23-servicedefinities, proto-types en gRPC-clients zijn het werk van Google.
 
 > **googleads/google-ads-mcp** — https://github.com/googleads/google-ads-mcp  
-> Patterns: MCP singleton, `search_stream` + `field_mask.paths`
+> Patronen: MCP-singleton, `search_stream` + `field_mask.paths`
 
 > **google-marketing-solutions/google_ads_mcp** — https://github.com/google-marketing-solutions/google_ads_mcp  
-> Patterns: doc-serving MCP tools, remote OAuth, `omit_unselected_resource_names`
+> Patronen: documentatie-MCP-tools, externe OAuth, `omit_unselected_resource_names`
 
 ### Community (MIT)
 
 > **cohnen/mcp-google-ads** — https://github.com/cohnen/mcp-google-ads  
-> Patterns: `format_value` proto serialization helper
+> Patronen: `format_value` proto-serialisatiehelper
 
 > **gomarble-ai/google-ads-mcp-server** — https://github.com/gomarble-ai/google-ads-mcp-server  
-> Patterns: dual transport (stdio + HTTP), KeywordPlanIdeaService
+> Patronen: duaal transport (stdio + HTTP), KeywordPlanIdeaService
 
 > **itallstartedwithaidea/google-ads-api-agent** — https://github.com/itallstartedwithaidea/google-ads-api-agent  
-> Patterns: auction insights, change history, campaign creator, bidding strategy manager,
-> negative keywords, geo targeting, PMax reporting, Filter-First Architecture
+> Patronen: veilinginzichten, wijzigingsgeschiedenis, campagnemaker, biedstrategiebeheerder,
+> uitsluitingszoekwoorden, geografische targeting, PMax-rapportage, Filter-First-architectuur
 
-Full per-feature attribution table: [`docs/SERVICES.md`](docs/SERVICES.md)
-
----
-
-## Related
-
-- **[google-ads-skills](https://github.com/itallstartedwithaidea/google-ads-skills)** — Anthropic Agent Skills for Claude (analysis, audit, write, math, MCP)
-- **[google-ads-api-agent](https://github.com/itallstartedwithaidea/google-ads-api-agent)** — Full Python agent with 28 API actions and 6 sub-agents
-- **[google-ads-gemini-extension](https://github.com/itallstartedwithaidea/google-ads-gemini-extension)** — Gemini CLI extension with 22 MCP tools, skills, commands, and themes
-- **[googleadsagent.ai](https://googleadsagent.ai)** — Production deployment (Buddy) on Cloudflare with semantic memory, billing, and monitoring
+Volledige toewijzingstabel per functie: [`docs/SERVICES.md`](docs/SERVICES.md)
 
 ---
 
-## License
+## Gerelateerd
 
-MIT — see [LICENSE](LICENSE)  
-`google-ads` dependency: Apache 2.0, Copyright 2023 Google LLC  
+- **[google-ads-skills](https://github.com/itallstartedwithaidea/google-ads-skills)** — Anthropic Agent-vaardigheden voor Claude (analyse, audit, schrijven, wiskunde, MCP)
+- **[google-ads-api-agent](https://github.com/itallstartedwithaidea/google-ads-api-agent)** — Volledige Python-agent met 28 API-acties en 6 sub-agents
+- **[google-ads-gemini-extension](https://github.com/itallstartedwithaidea/google-ads-gemini-extension)** — Gemini CLI-extensie met 22 MCP-tools, vaardigheden, commando's en thema's
+- **[googleadsagent.ai](https://googleadsagent.ai)** — Productie-implementatie (Buddy) op Cloudflare met semantisch geheugen, facturering en monitoring
+
+---
+
+## Licentie
+
+MIT — zie [LICENSE](LICENSE)  
+`google-ads`-afhankelijkheid: Apache 2.0, Copyright 2023 Google LLC  
 FastMCP: Apache 2.0
 
 ---
 
-[googleadsagent.ai](https://googleadsagent.ai) · [Google Ads API Docs](https://developers.google.com/google-ads/api) · [MCP Spec](https://modelcontextprotocol.io)
+[googleadsagent.ai](https://googleadsagent.ai) · [Google Ads API-documentatie](https://developers.google.com/google-ads/api) · [MCP-specificatie](https://modelcontextprotocol.io)
